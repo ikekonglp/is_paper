@@ -5,11 +5,12 @@
 \sloppy     % better line breaks
 
 \title{Multi-task Learning with CTC and Segmental CRF for Speech Recognition}
-\name{Liang Lu$^1$, Lingpeng Kong$^2$}
-\address{
-  $^1$Toyota Technological Institute at Chicago, USA\\
-  $^2$School of Computer Science, Carnegie Mellon University, USA}
-\email{llu@ttic.edu, lingpenk@cmu.edu}
+\makeatother \name{ Liang Lu$^\dag$, Lingpeng Kong$^\ddag$, Chris Dyer$^\S$, and Noah A. Smith$^\diamond$}
+\address{$^\dag$Toyota Technological Institute at Chicago, USA\\
+  $^\ddag$School of Computer Science, Carnegie Mellon University, USA\\
+ $^\S$Google DeepMind, London, UK \\
+ $^\diamond$Computer Science \& Engineering, The University of Washington, Seattle, USA} 
+\email{llu@ttic.edu, lingpenk@cs.cmu.edu, cdyer@google.com, nasmith@cs.washington.edu}
 
 \begin{document}
 
@@ -17,6 +18,7 @@
 % 
 \begin{abstract}
 Segmental conditional random fields (SCRFs) and connectionist temporal classification (CTC) are two  sequence labeling objectives used for end-to-end training of speech recognition models. Both models define the transcription probability by marginalizing decisions about latent segmentation alternatives to derive a sequence probability: the former uses a globally normalized joint model of segment labels and durations, and the latter classifies each frame as either an output symbol or a ``continuation'' of the previous label.  In this paper, we train a recognition model by optimizing an interpolation between the SCRF and CTC losses, where the same recurrent neural network (RNN) encoder used for feature extraction for both outputs. We find that this multi-task objective improves recognition accuracy when decoding with either the SCRF or CTC models. Additionally, we show that CTC can also be used to pretrain the RNN encoder, which improves the convergence rate when learning the joint model. 
+%Segmental Conditional Random Field (SCRF) and Connectionist Temporal Classification (CTC) have been well studied for acoustic modeling. The former defines the loss function at the sequence level, while the latter defines the loss at the frame level. When combined with neural networks for feature extraction, both models can be trained end-to-end. In this paper, we study the joint training approach of the two models using an interpolated loss functions for speech recognition, where both SCRF and CTC share the same recurrent neural network (RNN) encoder used for feature extraction. We show that the joint training approach improves the recognition accuracy of both SCRF and CTC models due to the regularization effect, which is similar to the observation of HMMs where sequence-discriminative training using a sequence-level loss can benefit from the cross entropy (CE) based regularization. Moreover, we show that CTC can also be used to pretrain the RNN encoder, which improves the convergence speed of the joint model. 
 \end{abstract}
 \noindent\textbf{Index Terms}: speech recognition, end-to-end training, CTC, segmental RNN
 
@@ -50,7 +52,7 @@ Similar to other CRF-based models, the function $f(\cdot)$ is defined as
 \label{eq:phi}
 f \left( y_j, {\bm e}_j, \bar{\bm x}_t \right) = \mathbf{w}^\top \Phi (y_j, {\bm e}_j, \bar{\bm x}_j),
 \end{eqnarray}
-where $\Phi(\cdot)$ denotes the feature function, and $\mathbf{w}$ is the weight vector. Most of conventional approaches for SCRF-based acoustic models use manually defined feature function $\Phi(\cdot)$, where the features and segment boundary information are provided by an auxiliary system. In~\cite{lu2016segmental}, we proposed an end-to-end training approach for SCRFs, where $\Phi(\cdot)$ was defined with neural networks, and the segmental level features were leaned by RNNs. The model was referred as segmental RNN (SRNN), and it will used as the implementation of the SCRF acoustic model for multi-task learning in this study. 
+where $\Phi(\cdot)$ denotes the feature function, and $\mathbf{w}$ is the weight vector. Most of conventional approaches for SCRF-based acoustic models use manually defined feature function $\Phi(\cdot)$, where the features and segment boundary information are provided by an auxiliary system~\cite{zweig2011speech, fosler2013conditional}. In~\cite{kong2015segmental, lu2016segmental}, we proposed an end-to-end training approach for SCRFs, where $\Phi(\cdot)$ was defined with neural networks, and the segmental level features were leaned by RNNs. The model was referred as segmental RNN (SRNN), and it will used as the implementation of the SCRF acoustic model for multi-task learning in this study. 
 
 
 \subsection{Feature Function and Acoustic Embedding}
@@ -70,7 +72,7 @@ SRNN uses an RNN to learn segmental level acoustic embeddings. Given the input s
   \text{\tt RNN}({\bm h}_{n_j-1}, {\bm x}_{n_j}) 
 \end{array} \right]
 \end{align}
-where ${\bm h}_0$ denotes the initial hidden state, which is initialized to be zero. {\tt RNN}($\cdot$) denotes the nonlinear recurrence operation used in an RNN, which takes the previous hidden state and the feature vector at the current timestep as inputs, and produce an updated hidden state vector. Given the recurrent hidden states, the embedding vector can be simply defined as $\bar{\bm x}_j= {\bm h}_{n_j}$ as in our previous work~\cite{lu2016segmental}. However, the drawback of this implementation is the large memory cost, as we need to store the array of hidden states $\{{\bm h}_{s_j}, \cdots, {\bm h}_{n_j}\}$ for all the possible segments $\langle s_j, n_j\rangle$. If we denote $H$ as the dimension of an RNN hidden state, the memory cost will be in the order of $O(T^2H)$, where $T$ is the length of $\bm X$. It is particularly a problem for the joint model as the CTC model requires additional memory space. In this work, we adopted another approach that requires much less memory. In this approach, we use an RNN to read the whole input sequence as 
+where ${\bm h}_0$ denotes the initial hidden state, which is initialized to be zero. {\tt RNN}($\cdot$) denotes the nonlinear recurrence operation used in an RNN, which takes the previous hidden state and the feature vector at the current timestep as inputs, and produce an updated hidden state vector. Given the recurrent hidden states, the embedding vector can be simply defined as $\bar{\bm x}_j= {\bm h}_{n_j}$ as in our previous work~\cite{lu2016segmental}. However, the drawback of this implementation is the large memory cost, as we need to store the array of hidden states $\{{\bm h}_{s_j}, \cdots, {\bm h}_{n_j}\}$ for all the possible segments $\langle s_j, n_j\rangle$. If we denote $H$ as the dimension of an RNN hidden state, the memory cost will be in the order of $O(T^2H)$, where $T$ is the length of $\bm X$. It is particularly a problem for the joint model as the CTC model requires additional memory space. In this work, we adopt another approach that requires much less memory. In this approach, we use an RNN to read the whole input sequence as 
 \begin{align}
 \left [ \begin{array}{c}
 {\bm h}_{1}  \\
@@ -165,7 +167,7 @@ Our experiments were performed on the TIMIT database, and both the SRNN and CTC 
 \hline
 
 \hline
-Model & features  & \#Layer & Dim & dev  & eval \\ \hline
+Model & Features  & \#Layer & Dim & dev  & eval \\ \hline
 SRNN & FBANK & 3 & 128 & 19.2 & 20.5 \\
 %SRNN & FBANK & 6 & 128 & 18.6 & 20.9 \\
 SRNN & fMLLR & 3 & 128 & 17.6 & 19.2 \\
@@ -188,7 +190,7 @@ CTC & fMLLR & 3 & 250 & 16.7 & 17.8 \\ \hline
 \hline
 
 \hline
-Model & features   & Dim & dev  & eval \\ \hline
+Model & Features   & Dim & dev  & eval \\ \hline
 SRNN & FBANK & 250 & 18.1 & 20.0 \\
 $\quad$+MTL & FBANK& 250 &17.5& 18.7 \\
 SRNN & fMLLR & 250 & 16.6 & 17.9 \\
@@ -213,11 +215,11 @@ $\quad$+MTL   & fMLLR & 250 & 16.2 & 17.4 \\ \hline
 
 \subsection{Baseline Results}
 
-Table \ref{tab:baseline} shows the baseline results of SRNN and CTC models using two different kinds of features. The FBANK features are 120-dimensional with delta and delta-delta coefficients, and the fMLLR features are 40-dimensional, which were obtained from a Kaldi baseline system. We used a 3-layer bidirectional LSTMs for feature extraction, and we used the greedy best path decoding algorithm for both models. Our SRNN and CTC achieved comparable phone error rate (PER) for both kinds of features. However, for the CTC system, Graves et al.~\cite{graves2013speech} obtained better result using about the same size of neural network (3 hidden layers with 250 hidden units of bidirectional LSTMs) than ours (18.6\% vs.19.9\%). Apart from the implementation difference using different code bases, Graves et al.~\cite{graves2013speech} applied the prefix decoding with beam search, which may have lower search error than our best path decoding algorithm. 
+Table \ref{tab:baseline} shows the baseline results of SRNN and CTC models using two different kinds of features. The FBANK features are 120-dimensional with delta and delta-delta coefficients, and the fMLLR features are 40-dimensional, which were obtained from a Kaldi baseline system. We used a 3-layer bidirectional LSTMs for feature extraction, and we used the greedy best path decoding algorithm for both models. Our SRNN and CTC achieved comparable phone error rate (PER) for both kinds of features. However, for the CTC system, Graves et al.~\cite{graves2013speech} obtained better result using about the same size of neural network (3 hidden layers with 250 hidden units of bidirectional LSTMs) than ours (18.6\% vs.19.9\%). Apart from the implementation difference of using different code bases, Graves et al.~\cite{graves2013speech} applied the prefix decoding with beam search, which may have lower search error than our best path decoding algorithm. 
 
 \subsection{Multi-task Learning Results}
 
-Table~\ref{tab:mtl} shows results of multi-task learning for CTC and SRNN using the interpolated loss as Eq. \eqref{eq:mtl}. We only show results of using LSTMs with 250 dimensional hidden states. The interpolation weight was set to be 0.5. In our experiments, tuning the interpolation weight did not further improve the recognition accuracy. From Table ~\ref{tab:mtl}, we can see from the table that multi-task learning improve recognition accuracies of both SRNN and CTC acoustic models, which may due to the regularization effect of the joint training loss. The improvement for FBANK feature is relatively much larger than fMLLR features.  
+Table~\ref{tab:mtl} shows results of multi-task learning for CTC and SRNN using the interpolated loss as Eq. \eqref{eq:mtl}. We only show results of using LSTMs with 250 dimensional hidden states. The interpolation weight was set to be 0.5. In our experiments, tuning the interpolation weight did not further improve the recognition accuracy. From Table ~\ref{tab:mtl}, we can see from the table that multi-task learning improve recognition accuracies of both SRNN and CTC acoustic models, which may due to the regularization effect of the joint training loss. The improvement for FBANK feature is relatively much larger than fMLLR features. In particular, with multi-task learning, the recognition accuracy of our CTC system with best path decoding is comparable to the results obtained by Graves et al.~\cite{graves2013speech} with beam search decoding. 
 
 One of the major drawbacks of SCRF models is their high computational cost. In our experiments, the CTC model is around 3 - 4 times faster than the SRNN model which uses the same RNN encoder. The joint model by multi-task learning is slightly more expensive than the standalone SRNN model. To cut down the computational cost, we investigated if CTC can be used to pretrain the RNN encoder to speed up the training of the joint model. This is analogous to sequence training of HMM acoustic models, where the network is usually pretrained by the frame-level CE criterion. Figure \ref{fig:ctc-pretrain} shows the convergence curves of the joint model with and without CTC pretraining, and we see  pretraining indeed improves the convergence speed of the joint model. %For sequence training of HMMs, it usually takes around 4 - 6 iterations to converge.  
  

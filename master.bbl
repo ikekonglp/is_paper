@@ -39,8 +39,8 @@ W.~Xiong, J.~Droppo, X.~Huang, F.~Seide, M.~Seltzer, A.~Stolcke, D.~Yu, and
   \emph{arXiv preprint arXiv:1610.05256}, 2016.
 
 \bibitem{soltau2016neural}
-H.~Soltau, H.~Liao, and H.~Sak, ``Neural speech recognizer: Acoustic-to-word
-  lstm model for large vocabulary speech recognition,'' \emph{arXiv preprint
+H.~Soltau, H.~Liao, and H.~Sak, ``{Neural Speech Recognizer: Acoustic-to-Word
+  LSTM Model for Large Vocabulary Speech Recognition},'' \emph{arXiv preprint
   arXiv:1610.09975}, 2016.
 
 \bibitem{graves2014towards}
@@ -106,6 +106,22 @@ H.~Su, G.~Li, D.~Yu, and F.~Seide, ``Error back propagation for sequence
   training of context-dependent deep networks for conversational speech
   transcription,'' in \emph{Proc. ICASSP}.\hskip 1em plus 0.5em minus
   0.4em\relax IEEE, 2013, pp. 6664--6668.
+
+\bibitem{zweig2011speech}
+G.~Zweig, P.~Nguyen, D.~Van~Compernolle, K.~Demuynck, L.~Atlas, P.~Clark,
+  G.~Sell, M.~Wang, F.~Sha, H.~Hermansky \emph{et~al.}, ``Speech
+  recognitionwith segmental conditional random fields: A summary of the jhu
+  clsp 2010 summer workshop,'' in \emph{Proc. ICASSP}.\hskip 1em plus 0.5em
+  minus 0.4em\relax IEEE, 2011, pp. 5044--5047.
+
+\bibitem{fosler2013conditional}
+E.~Fosler-Lussier, Y.~He, P.~Jyothi, and R.~Prabhavalkar, ``Conditional random
+  fields in speech, audio, and language processing,'' \emph{Proceedings of the
+  IEEE}, vol. 101, no.~5, pp. 1054--1075, 2013.
+
+\bibitem{kong2015segmental}
+L.~Kong, C.~Dyer, and N.~A. Smith, ``Segmental recurrent neural networks,'' in
+  \emph{Proc. ICLR}, 2016.
 
 \bibitem{sarawagi2004semi}
 S.~Sarawagi and W.~W. Cohen, ``Semi-markov conditional random fields for
